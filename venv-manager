@@ -1,0 +1,57 @@
+PYTHON_EXEC="/usr/bin/python3"
+VENVS_DIR="$HOME/.venvs"
+
+_echo-err() {
+	echo "$@" >&2
+}
+
+_venv-check() {
+	[[ -e "$VENVS_DIR/$1" ]] || return 1
+}
+
+_check-params() {
+	[[ "$#" -eq 1 ]] || return 1
+}
+
+venv-delete() {
+	if ! _check-params "$@"; then
+		_echo-err 'USAGE: venv-delete <VENV-NAME>'
+		return 1
+	fi
+
+	if _venv-check "$1"; then
+		rm -rf "$VENVS_DIR/$1"
+	else
+		_echo-err "Virtual environment '$1' not found"
+		return 1
+	fi
+}
+
+venv-create() {
+	if ! _check-params "$@"; then
+		_echo-err 'USAGE: venv-create <VENV-NAME>'
+		return 1
+	fi
+
+	if _venv-check "$1"; then
+		_echo-err "Virtual environment '$1' already exist"
+		return 1
+	else
+		$PYTHON_EXEC -m venv "$VENVS_DIR/$1" && \
+			echo "New virtual environment '$1' created"
+	fi
+}
+
+venv-activate() {
+	if ! _check-params "$@"; then
+		_echo-err 'USAGE: venv-activate <VENV-NAME>'
+		return 1
+	fi
+
+	if _venv-check "$1"; then
+		. "$VENVS_DIR/$1/bin/activate"
+	else
+		_echo-err "Virtual environment '$1' not found"
+		return 1
+	fi
+}
